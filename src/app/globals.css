@@ -1,6 +1,52 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@import url("https://fonts.googleapis.com/css2?family=Work+Sans:wght@100;200;300;400;500;600;700;800;900&display=swap");
+
+@font-face {
+  font-family: "WorkThin";
+  src: url("../fonts/WorkSans-Thin.ttf");
+}
+
+@font-face {
+  font-family: "WorkExtraLight";
+  src: url("../fonts/WorkSans-ExtraLight.ttf");
+}
+
+@font-face {
+  font-family: "WorkLight";
+  src: url("../fonts/WorkSans-Light.ttf");
+}
+
+@font-face {
+  font-family: "WorkRegular";
+  src: url("../fonts/WorkSans-Regular.ttf");
+}
+
+@font-face {
+  font-family: "WorkMedium";
+  src: url("../fonts/WorkSans-Medium.ttf");
+}
+
+@font-face {
+  font-family: "WorkSemiBold";
+  src: url("../fonts/WorkSans-SemiBold.ttf");
+}
+
+@font-face {
+  font-family: "WorkBold";
+  src: url("../fonts/WorkSans-Bold.ttf");
+}
+
+@font-face {
+  font-family: "WorkExtraBold";
+  src: url("../fonts/WorkSans-ExtraBold.ttf");
+}
+
+@font-face {
+  font-family: "WorkBlac";
+  src: url("../fonts/WorkSans-Black.ttf");
+}
 
 :root {
   --foreground-rgb: 0, 0, 0;
@@ -24,4 +70,8 @@ body {
       rgb(var(--background-end-rgb))
     )
     rgb(var(--background-start-rgb));
+
+  .scrollBar::-webkit-scrollbar {
+    display: none;
+  }
 }
