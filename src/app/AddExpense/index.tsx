@@ -17,10 +17,12 @@ import { useEffect, useState } from "react";
 import { addDoc, collection } from "firebase/firestore";
 import { db } from "@/util/firebase";
 import moment from "moment";
+import lockr from "lockr";
 
 const AddExpense = ({ visible, close, userList, user, getData }: any) => {
   const [loading, setLoading] = useState<any>(false);
   const [keepOpen, setKeepOpen] = useState<boolean>(false);
+  const [enteredBy, setEnteredBy] = useState<any>(null);
 
   const formik = useFormik({
     initialValues: {
@@ -29,7 +31,6 @@ const AddExpense = ({ visible, close, userList, user, getData }: any) => {
       amount: null,
       paidBy: null,
       paidBack: false,
-      enteredBy: null,
     },
     onSubmit: async (values, { resetForm }) => {
       try {
@@ -37,6 +38,7 @@ const AddExpense = ({ visible, close, userList, user, getData }: any) => {
         const docRef = await addDoc(collection(db, "expenses"), {
           ...values,
           date: moment(values?.date).format(),
+          enteredBy,
         });
         setLoading(false);
         resetForm();
@@ -60,10 +62,12 @@ const AddExpense = ({ visible, close, userList, user, getData }: any) => {
   const { errors, touched, values, setFieldValue } = formik;
 
   useEffect(() => {
-    if (user && userList.length) {
-      let id = userList.find((item: any) => item.email === user).id;
+    if (user && userList.length > 0) {
+      let id = userList.find((item: any) =>
+        [user, lockr.get("userEmail")].includes(item.email),
+      )?.id;
       if (id) {
-        setFieldValue("enteredBy", id);
+        setEnteredBy(id);
       }
     }
   }, [user, userList]);

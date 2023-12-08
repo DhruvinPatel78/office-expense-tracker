@@ -16,6 +16,7 @@ import Header from "@/components/Header";
 import moment from "moment";
 import { CircularProgress } from "@mui/joy";
 import AddExpense from "@/app/AddExpense";
+import lockr from "lockr";
 const Home = () => {
   const router = useRouter();
   const [loading, setLoading] = useState<boolean>(false);
@@ -37,6 +38,7 @@ const Home = () => {
         // https://firebase.google.com/docs/reference/js/auth.user
         const uid = user.uid;
         setUser(user.email);
+        lockr.set("userEmail", user.email);
         setLoggedIn(true);
         setPageLoading(false);
         // ...

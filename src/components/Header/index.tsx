@@ -2,6 +2,7 @@ import { signOut } from "firebase/auth";
 import { auth } from "@/util/firebase";
 import { IconButton } from "@mui/joy";
 import RefreshIcon from "@mui/icons-material/Refresh";
+import lockr from "lockr";
 
 const Header = ({ refreshData }: any) => {
   return (
@@ -17,7 +18,10 @@ const Header = ({ refreshData }: any) => {
           className={
             "bg-primary rounded-lg shadow-[1px_2px_3px_0px_rgba(70,118,251,0.41)] px-5 h-10"
           }
-          onClick={() => signOut(auth)}
+          onClick={() => {
+            signOut(auth);
+            lockr.rm();
+          }}
         >
           Logout
         </button>
