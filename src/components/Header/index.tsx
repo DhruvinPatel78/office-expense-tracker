@@ -20,7 +20,7 @@ const Header = ({ refreshData }: any) => {
           }
           onClick={() => {
             signOut(auth);
-            lockr.rm();
+            lockr.rm("userEmail");
           }}
         >
           Logout

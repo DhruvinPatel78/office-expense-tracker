@@ -38,7 +38,7 @@ const Home = () => {
         // https://firebase.google.com/docs/reference/js/auth.user
         const uid = user.uid;
         setUser(user.email);
-        lockr.set("userEmail", user.email);
+        lockr.set("userEmail", user?.email || "");
         setLoggedIn(true);
         setPageLoading(false);
         // ...
