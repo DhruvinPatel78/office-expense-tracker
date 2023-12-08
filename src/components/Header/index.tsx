@@ -3,10 +3,12 @@ import { auth } from "@/util/firebase";
 import { IconButton } from "@mui/joy";
 import RefreshIcon from "@mui/icons-material/Refresh";
 
-const Header = ({ refreshData }) => {
+const Header = ({ refreshData }: any) => {
   return (
     <div className={"w-full flex justify-between items-center py-2"}>
-      <p className={"text-primary text-lg sm:text-[34px] font-bold"}>Office Expenses</p>
+      <p className={"text-primary text-lg sm:text-[34px] font-bold"}>
+        Office Expenses
+      </p>
       <div className={"flex justify-center items-center gap-2"}>
         <IconButton onClick={() => refreshData(true)}>
           <RefreshIcon />
