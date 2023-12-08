@@ -2,14 +2,19 @@
 
 import { FormikProvider, useFormik, Form, Field } from "formik";
 import * as Yup from "yup";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/util/firebase";
 import { useRouter } from "next/navigation";
-import { CircularProgress } from "@mui/joy";
+import { CircularProgress, Alert } from "@mui/joy";
+
+const errorMessages = {
+  "auth/invalid-credential": "Email or Password invalid",
+};
 
 const Login = () => {
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const router = useRouter();
 
@@ -29,6 +34,8 @@ const Login = () => {
         .catch((error) => {
           const errorCode = error.code;
           const errorMessage = error.message;
+          // console.log(errorCode, errorMessage);
+          setError(error.code);
         })
         .finally(() => {
           setLoading(false);
@@ -42,6 +49,12 @@ const Login = () => {
   });
 
   const { errors, touched, values } = formik;
+
+  useEffect(() => {
+    if (error) {
+      setTimeout(() => setError(""), 2000);
+    }
+  }, [error]);
 
   return (
     <div className={"bg-lightBlue h-screen flex justify-center items-center"}>
@@ -105,6 +118,20 @@ const Login = () => {
           </Form>
         </FormikProvider>
       </div>
+      {error && (
+        <Alert
+          color="danger"
+          size="md"
+          variant="soft"
+          style={{
+            position: "absolute",
+            left: "16px",
+            bottom: "16px",
+          }}
+        >
+          {errorMessages[error]}
+        </Alert>
+      )}
     </div>
   );
 };

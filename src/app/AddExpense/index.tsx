@@ -16,6 +16,7 @@ import * as Yup from "yup";
 import { useEffect, useState } from "react";
 import { addDoc, collection } from "firebase/firestore";
 import { db } from "@/util/firebase";
+import moment from "moment";
 
 const AddExpense = ({ visible, close, userList, user, getData }) => {
   const [loading, setLoading] = useState<any>(false);
@@ -27,6 +28,7 @@ const AddExpense = ({ visible, close, userList, user, getData }) => {
       description: "",
       amount: null,
       paidBy: null,
+      paidBack: false,
       enteredBy: null,
     },
     onSubmit: async (values, { resetForm }) => {
@@ -34,8 +36,10 @@ const AddExpense = ({ visible, close, userList, user, getData }) => {
         setLoading(true);
         const docRef = await addDoc(collection(db, "expenses"), {
           ...values,
+          date: moment(values?.date).format(),
         });
         setLoading(false);
+        resetForm();
         if (!keepOpen) {
           close(false);
           getData(true);
@@ -57,9 +61,7 @@ const AddExpense = ({ visible, close, userList, user, getData }) => {
 
   useEffect(() => {
     if (user && userList.length) {
-      let id = userList.find(
-        (item: any) => item.name === user.split("@")[0],
-      ).id;
+      let id = userList.find((item: any) => item.email === user).id;
       if (id) {
         setFieldValue("enteredBy", id);
       }
@@ -133,12 +135,26 @@ const AddExpense = ({ visible, close, userList, user, getData }) => {
                   <p className={"text-error text-sm "}>{errors.paidBy}</p>
                 )}
               </FormControl>
+              <FormControl>
+                <FormLabel>Paid Back</FormLabel>
+                <Select
+                  name={"paidBack"}
+                  onChange={(e, value) => setFieldValue("paidBack", value)}
+                  className={
+                    "w-full rounded-lg bg-white h-10 border-2 border-solid border-[#E4E5FF] focus:outline-[#DFDFDF] text-primary"
+                  }
+                  value={values.paidBack}
+                >
+                  <Option value={false}>No</Option>
+                  <Option value={true}>Yes</Option>
+                </Select>
+              </FormControl>
               <Radio
                 color="primary"
                 checked={keepOpen}
                 onClick={() => setKeepOpen((prev) => !prev)}
                 className={"text-primary"}
-                label="Keep Open"
+                label="Keep Modal Open"
                 variant="soft"
               />
               <Button type="submit" variant="solid" className={"bg-primary"}>
