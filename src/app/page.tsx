@@ -20,6 +20,7 @@ const Home = () => {
   const router = useRouter();
   const [loading, setLoading] = useState<boolean>(false);
   const [loggedIn, setLoggedIn] = useState<boolean>(false);
+  const [pageLoading, setPageLoading] = useState<boolean>(true);
   const [expenses, setExpenses] = useState<any>([]);
 
   const [userList, setUserList] = useState<any>([]);
@@ -29,6 +30,7 @@ const Home = () => {
   const [lastVisible, setLastVisible] = useState<any>(null);
 
   useEffect(() => {
+    setPageLoading(true);
     onAuthStateChanged(auth, (user) => {
       if (user) {
         // User is signed in, see docs for a list of available properties
@@ -36,6 +38,7 @@ const Home = () => {
         const uid = user.uid;
         setUser(user.email);
         setLoggedIn(true);
+        setPageLoading(false);
         // ...
       } else {
         router.replace("/login");
@@ -117,7 +120,22 @@ const Home = () => {
     return amt;
   }, [userList, expenses]);
 
-  return (
+  return pageLoading ? (
+    <div
+      className={
+        "w-screen h-screen bg-lightBlue flex justify-center items-center"
+      }
+    >
+      <CircularProgress
+        sx={{
+          "--CircularProgress-progressColor": "#5D5FEF",
+        }}
+        determinate={false}
+        size="lg"
+        variant="plain"
+      />
+    </div>
+  ) : (
     <div className={"w-screen h-screen bg-lightBlue px-4 sm:px-10"}>
       <Header refreshData={getData} />
       {expenses.length ? (
