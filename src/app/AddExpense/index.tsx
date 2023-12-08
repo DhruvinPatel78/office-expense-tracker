@@ -18,7 +18,7 @@ import { addDoc, collection } from "firebase/firestore";
 import { db } from "@/util/firebase";
 import moment from "moment";
 
-const AddExpense = ({ visible, close, userList, user, getData }) => {
+const AddExpense = ({ visible, close, userList, user, getData }: any) => {
   const [loading, setLoading] = useState<any>(false);
   const [keepOpen, setKeepOpen] = useState<boolean>(false);
 
