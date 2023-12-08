@@ -1,34 +1,30 @@
 "use client";
-
-import {
-  collection,
-  getDocs,
-  query,
-  orderBy,
-  limit,
-  startAfter,
-} from "firebase/firestore";
-import { db, auth } from "@/util/firebase";
-import { useEffect, useState, useMemo } from "react";
-import { onAuthStateChanged } from "firebase/auth";
-import { useRouter } from "next/navigation";
 import Header from "@/components/Header";
-import moment from "moment";
 import { CircularProgress } from "@mui/joy";
-import AddExpense from "@/app/AddExpense";
+import moment from "moment/moment";
+import { useEffect, useState } from "react";
+import { collection, getDocs, orderBy, query } from "firebase/firestore";
+import { auth, db } from "@/util/firebase";
+import { onAuthStateChanged } from "firebase/auth";
 import lockr from "lockr";
-const Home = () => {
+import { useRouter } from "next/navigation";
+import PayAmount from "@/app/dashboard/PayAmount";
+
+const Dashboard = () => {
   const router = useRouter();
   const [loading, setLoading] = useState<boolean>(false);
   const [loggedIn, setLoggedIn] = useState<boolean>(false);
   const [pageLoading, setPageLoading] = useState<boolean>(true);
   const [expenses, setExpenses] = useState<any>([]);
-
-  const [userList, setUserList] = useState<any>([]);
-  const [addExpenseModal, setAddExpenseModal] = useState<any>(false);
   const [user, setUser] = useState<any>(null);
-
-  const [lastVisible, setLastVisible] = useState<any>(null);
+  const [userList, setUserList] = useState<any>([]);
+  const [payModal, setPayModal] = useState<any>(false);
+  const [dashboardData, setDashboardData] = useState<any>({
+    total: 0,
+    remain: 0,
+    max: 0,
+    min: 0,
+  });
 
   useEffect(() => {
     setPageLoading(true);
@@ -37,8 +33,8 @@ const Home = () => {
         // User is signed in, see docs for a list of available properties
         // https://firebase.google.com/docs/reference/js/auth.user
         const uid = user.uid;
-        if (user.email === "admin@office.com") {
-          router.replace("/dashboard");
+        if (user.email !== "admin@office.com") {
+          router.replace("/");
         } else {
           setUser(user.email);
           lockr.set("userEmail", user?.email || "");
@@ -60,20 +56,6 @@ const Home = () => {
       setExpenses([]);
     }
 
-    // const docSnapshot =
-    //   lastVisible && !refresh
-    //     ? await getDocs(
-    //         query(
-    //           collection(db, "expenses"),
-    //           orderBy("date"),
-    //           startAfter(lastVisible),
-    //           limit(2),
-    //         ),
-    //       )
-    //     : await getDocs(
-    //         query(collection(db, "expenses"), orderBy("date"), limit(2)),
-    //       );
-
     const docSnapshot = await getDocs(
       query(collection(db, "expenses"), orderBy("date")),
     );
@@ -89,11 +71,25 @@ const Home = () => {
       ]);
     }
     setLoading(false);
-
-    // console.log(docSnapshot.docs, docSnapshot.docs.length, docSnapshot.docs[docSnapshot.docs.length - 1]);
-    //
-    // setLastVisible(docSnapshot.docs[docSnapshot.docs.length - 1]);
   };
+
+  useEffect(() => {
+    if (expenses.length) {
+      let total = expenses
+        .map((item: any) => item.amount)
+        .reduce((a: any, b: any) => a + b, 0);
+
+      let remain = expenses
+        .filter((item: any) => !item.paidBack)
+        .map((item: any) => item.amount)
+        .reduce((a: any, b: any) => a + b, 0);
+
+      let max = Math.max(...expenses.map((item: any) => item.amount));
+      let min = Math.min(...expenses.map((item: any) => item.amount));
+
+      setDashboardData((prev) => ({ ...prev, total, remain, max, min }));
+    }
+  }, [expenses]);
 
   useEffect(() => {
     if (loggedIn) {
@@ -110,21 +106,6 @@ const Home = () => {
       getData(true);
     }
   }, [loggedIn]);
-
-  const unsettledAmount = useMemo(() => {
-    let amt = 0;
-    if (expenses && userList) {
-      amt = expenses
-        .filter(
-          (item: any) =>
-            item.paidBy === userList.find((i: any) => i.email === user).id &&
-            !item.paidBack,
-        )
-        .map((item: any) => item.amount)
-        .reduce((a: any, b: any) => a + b, 0);
-    }
-    return amt;
-  }, [userList, expenses]);
 
   return pageLoading ? (
     <div
@@ -143,25 +124,55 @@ const Home = () => {
     </div>
   ) : (
     <div className={"w-screen h-screen bg-lightBlue px-4 sm:px-10"}>
-      <Header refreshData={getData} />
-      {expenses.length ? (
-        <p
+      <Header />
+      <div
+        className={
+          "w-full my-3 grid grid-rows-2 grid-cols-2 sm:grid-cols-4 sm:grid-rows-1 grid-flow-col gap-2 sm:gap-4"
+        }
+      >
+        <div
           className={
-            "text-center sm:text-right px-2 text-grayLight font-bold mt-2"
+            "h-[100px] bg-[#34495e] rounded-lg flex justify-center items-center text-2xl flex-col font-extrabold cursor-default"
           }
         >
-          Unsettled amount :{" "}
-          <span className={"text-grayLight font-bold"}>
-            &#8377;{}
-            {unsettledAmount}
-          </span>
-        </p>
-      ) : null}
+          &#8377;{}
+          {dashboardData.total}
+          <p className={"text-base font-normal"}>Total Expense</p>
+        </div>
+        <div
+          className={
+            "h-[100px] bg-[#c0392b] rounded-lg flex justify-center items-center text-2xl flex-col font-extrabold cursor-pointer"
+          }
+          onClick={() => setPayModal(true)}
+        >
+          &#8377;{}
+          {dashboardData.remain}
+          <p className={"text-base font-normal"}>Remain Payments</p>
+        </div>
+        <div
+          className={
+            "h-[100px] bg-[#16a085] rounded-lg flex justify-center items-center text-2xl flex-col font-extrabold cursor-default"
+          }
+        >
+          &#8377;{}
+          {dashboardData.max}
+          <p className={"text-base font-normal"}>Max Amount</p>
+        </div>
+        <div
+          className={
+            "h-[100px] bg-[#e67e22] rounded-lg flex justify-center items-center text-2xl flex-col font-extrabold cursor-default"
+          }
+        >
+          &#8377;{}
+          {dashboardData.min}
+          <p className={"text-base font-normal"}>Min Amount</p>
+        </div>
+      </div>
       <div
         className={
           "hidden w-full mt-2 rounded-3xl bg-white overflow-y-scroll scrollBar sm:block"
         }
-        style={{ maxHeight: "calc(100vh - 67px - 16px - 48px)" }}
+        style={{ maxHeight: "calc(100vh - 200px)" }}
       >
         <div
           className={
@@ -342,39 +353,17 @@ const Home = () => {
           );
         })}
       </div>
-
-      <button
-        className={
-          "w-14 h-14 hidden sm:flex justify-center items-center rounded-full bg-primary text-2xl absolute bottom-6 right-6"
-        }
-        onClick={() => setAddExpenseModal(true)}
-      >
-        +
-      </button>
-
-      <div className="flex sm:hidden absolute bottom-2 right-0 w-full px-4">
-        <button
-          className={`w-full h-12 rounded-lg bg-primary text-2xl sm:hidden flex justify-center items-center gap-1 shadow-[1px_2px_3px_0px_rgba(70,118,251,0.41)] ${
-            loading || !expenses.length ? "opacity-5" : ""
-          }`}
-          onClick={() => setAddExpenseModal(true)}
-          disabled={loading}
-        >
-          +{" "}
-          <span className={"flex font-bold text-base sm:hidden"}>
-            Add Expense
-          </span>
-        </button>
-      </div>
-      <AddExpense
-        visible={addExpenseModal}
-        close={setAddExpenseModal}
+      <PayAmount
+        visible={payModal}
+        close={(v) => {
+          setPayModal(v);
+          getData(true);
+        }}
         userList={userList}
-        user={user}
-        getData={getData}
+        expenses={expenses}
       />
     </div>
   );
 };
 
-export default Home;
+export default Dashboard;
