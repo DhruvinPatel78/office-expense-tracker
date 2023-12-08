@@ -8,7 +8,7 @@ import { auth } from "@/util/firebase";
 import { useRouter } from "next/navigation";
 import { CircularProgress, Alert } from "@mui/joy";
 
-const errorMessages = {
+const errorMessages: any = {
   "auth/invalid-credential": "Email or Password invalid",
 };
 
