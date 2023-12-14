@@ -355,7 +355,7 @@ const Dashboard = () => {
       </div>
       <PayAmount
         visible={payModal}
-        close={(v) => {
+        close={(v: any) => {
           setPayModal(v);
           getData(true);
         }}
