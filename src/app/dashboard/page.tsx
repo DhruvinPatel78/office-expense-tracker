@@ -87,7 +87,7 @@ const Dashboard = () => {
       let max = Math.max(...expenses.map((item: any) => item.amount));
       let min = Math.min(...expenses.map((item: any) => item.amount));
 
-      setDashboardData((prev) => ({ ...prev, total, remain, max, min }));
+      setDashboardData((prev: any) => ({ ...prev, total, remain, max, min }));
     }
   }, [expenses]);
 
